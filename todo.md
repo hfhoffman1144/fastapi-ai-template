@@ -1,0 +1,18 @@
+-  Rate limiting
+- [X] Get transformers running 
+- authentication
+    - [X] Set API token expiration
+    - [X] Create and test endpoint with authentication
+- inference end points
+    - [X] Streaming endpoint
+    - [X] Determine which model to try and get code running in collab
+    - [X] Create inference endpoint
+    - [X] Make endpoints open AI compatible
+    - [] Add db table to track requests and generate IDs
+    - [] Handle different message types
+- pre-commit
+- CI/CD
+    - [] Build image locally (need nvidia base image)
+    - [] Get cloud build pipeline implemented
+- Cloud run
+    - Deploy and test
