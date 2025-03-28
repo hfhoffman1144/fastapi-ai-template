@@ -25,7 +25,7 @@ dependencies = [
     "safetensors>=0.5.2",
     "sqlalchemy-bigquery>=1.12.1",
     "sqlmodel>=0.0.22",
-    "torch==2.5.1",
+    "torch==2.6.0",
     "uvicorn>=0.34.0",
     "vllm==0.8.1"
 ]
