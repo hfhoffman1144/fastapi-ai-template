@@ -11,14 +11,20 @@ from models.chat_models import ChatCompletionRequest, ChatMessage
 from auth.auth_utils import (
     get_current_active_user,
 )
-from chat_models.chat_model_interface import ChatModelInterface
+from vllm import AsyncLLMEngine, AsyncEngineArgs, SamplingParams
 from config import Config
 
 CONFIG = Config()
 
-MODEL_INTERFACE = ChatModelInterface(
-    model_id=CONFIG.CHAT_HF_MODEL_ID, torch_dtype=torch.float16
+engine_args = AsyncEngineArgs(
+    model=CONFIG.CHAT_HF_MODEL_ID,
+    enforce_eager=True,
+    dtype="float16",
+    gpu_memory_utilization=1,  # TODO: Parameterize,
+    max_model_len=1904,
 )
+MODEL_INTERFACE = AsyncLLMEngine.from_engine_args(engine_args)
+
 
 chat_models_router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -27,13 +33,23 @@ async def _model_stream_async_generator(request: ChatCompletionRequest):
 
     message = " ".join([m.content for m in request.messages])
 
-    model_content_gen = MODEL_INTERFACE.stream(
-        message=message,
-        max_new_tokens=request.max_tokens,
-        temperature=request.temperature,
+    sampling_params = SamplingParams(
+        temperature=request.temperature, max_tokens=request.max_tokens
     )
 
-    for i, chunk_text in enumerate(model_content_gen):
+    model_content_gen = MODEL_INTERFACE.generate(
+        message, sampling_params, request_id=time.monotonic()
+    )
+
+    i = 0
+    previous_text = ""
+
+    async for request_output in model_content_gen:
+
+        curr_full_text = request_output.outputs[0].text
+        chunk_text = curr_full_text[len(previous_text) :]
+        previous_text = curr_full_text
+
         chunk = {
             "id": i,
             "object": "chat.completion.chunk",
@@ -47,7 +63,10 @@ async def _model_stream_async_generator(request: ChatCompletionRequest):
                 }
             ],
         }
+
         yield f"data: {json.dumps(chunk)}\n\n"
+
+        i += 1
 
     yield "data: [DONE]\n\n"
 

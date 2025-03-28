@@ -8,6 +8,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-venv \
+    libnuma-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create and activate the virtual environment
