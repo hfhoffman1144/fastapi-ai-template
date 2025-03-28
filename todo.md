@@ -56,3 +56,11 @@ dependencies = [
 
 
 export DOCKER_HOST="unix://${HOME}/.colima/default/docker.sock"
+
+
+# TODO
+- Running locally
+docker build --no-cache -t fastapi-ai-template:latest .
+
+docker run -p 8000:8000 -v /Users/HarrisonHoffman/Desktop/DataScience/fastapi-ai-template/medium-demo-proj-c37770f6fe56.json:/app/gcp_credentials.json --env-file .env -e GOOGLE_APPLICATION_CREDENTIALS=/app/gcp_credentials.json fastapi-ai-template:latest
+
